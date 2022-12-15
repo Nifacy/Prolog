@@ -64,7 +64,7 @@ prefix2expr([Op|T], E) :- append(X, Y, T), prefix2expr(X, A), prefix2expr(Y, B),
 
 expr_permutation([X, Y, Z], O, E) :-
     member(A, O), member(B, O),
-    prefix2expr([A, X, B, Y, Z], E, []).
+    prefix2expr([A, X, B, Y, Z], E).
 
 lucky([X, Y, Z, X2, Y2, Z2], E1, E2) :-
     expr_permutation([X, Y, Z], [+, -, /, *], E1),
