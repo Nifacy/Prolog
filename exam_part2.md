@@ -98,7 +98,49 @@ substr(E, X, N, R) :- E=..[Op, A, B], substr(A, X, N, R1), substr(B, X, N, R2), 
 
 ### Решение
 
-*Пусто...*
+```Prolog
+make_number([X], X, 0, L) :- member(X, L).
+
+make_number([X|T], N, C, L) :-
+    member(X, L), make_number(T, N1, C1, L),
+    C is C1 + 1, N is N1 + X * 10 ^ C.
+
+rebus([O, D, I, N, +, O, D, I, N, =, M, N, O, G, O]) :-
+    make_number([O, D, I, N], N1, _, [9,8,7,6,5,4,3,2,1,0]),
+    make_number([M, N, O, G, O], N3, _, [9,8,7,6,5,4,3,2,1,0]),
+    N3 is 2 * N1, !.
+```
+
+### Решение (обобщенный случай)
+
+```Prolog
+expr_letter(A, C) :- atom(A), atom_chars(A, CL), member(C, CL).
+expr_letter(E, C) :- E=..[_, L, R], (expr_letter(L, C); expr_letter(R, C)).
+
+substr([], _, []) :- !.
+substr([X | T], S, [Y | R]) :- member([X, Y], S), substr(T, S, R).
+substr(W, S, R) :- atom(W), atom_chars(W, WL), substr(WL, S, RL), atom_chars(R, RL).
+
+substr_expr(W, S, R) :-
+	atom(W), substr(W, S, R2),
+	atom_number(R2, R).
+
+substr_expr(E, S, R) :-
+	E=..[Op, A, B],
+	substr_expr(A, S, A1), substr_expr(B, S, B1), R=..[Op, A1, B1].
+
+substractions([], _, []) :- !.
+substractions([S | T], L, [[S, X] | R]) :- select(X, L, L1), substractions(T, L1, R).
+
+solve(E, R) :-
+	setof(X, expr_letter(E, X), L), atom_chars('1234567890', N),
+	substractions(L, N, A), substr_expr(E, A, R),
+	R=..['=', B, C], BR is B, CR is C, BR = CR.
+
+rebus :-
+    solve('ОДИН' + 'ОДИН' = 'МНОГО', X),
+    write(X), nl.
+```
 
 # Вариант P2V4
 
