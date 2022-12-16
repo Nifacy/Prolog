@@ -172,10 +172,54 @@ bexpr(E, R) :- E=..[Op, A, B], bexpr(A, X), bexpr(B, Y), R=..[Op, X, Y].
 
 В IQ-тестах любят задачки на поиски недостающей фигуры, как приведено на рисунке.
 
+![O8o_9gd8Nr8](https://user-images.githubusercontent.com/95340036/208153226-cc537baa-21f6-4051-86ae-c439d1c3a471.jpg)
+
 1. Предложите способ представления фигур и их матрицы на Прологе
 2. Решите задачу поиска недостающей фигуры для поля $3 \times 3$
 3. Решите задачу для произвольного размера поля
 
 ### Решение
 
-*Пусто...*
+> Решение с самого экзамена. Относиться с осторожностью, может быть неправильным.
+
+```Prolog
+index(Index, List, Element) :-
+    append(A, [Element | _], List), length(A, Index).
+
+
+filter_element(Index, Element, [L | T], [L | R]) :-
+    index(Index, L, X), X \= Element, !,
+    filter_element(Index, Element, T, R).
+
+filter_element(Index, Element, [_ | T], R) :-
+    filter_element(Index, Element, T, R).
+
+filter_element(_, _, [], []).
+
+
+filter(A, Lists, Result) :-
+    length(A, N), N2 is N - 1, filter(N2, A, Lists, Result).
+
+filter(N, A, L, Result) :-
+    N > -1,
+    index(N, A, E), filter_element(N, E, L, L1),
+    N1 is N - 1, filter(N1, A, L1, Result).
+
+filter(-1, _, L, L).
+
+zip([[X, Y] | T], [X | A], [Y | B]) :- zip(T, A, B).
+zip([], [], []) :- !.
+
+filter_mask([R | M], L1, L2) :-
+    zip(R, A, B),
+    member(A, L1), member(B, L2),
+    filter(A, L1, L11), filter(B, L2, L22),
+    filter_mask(M, L11, L22).
+
+filter_mask([], _, _) :- !.
+
+mask(Mask, P1, P2) :-
+    findall(X, permutation(X, P1), L1),
+    findall(X, permutation(X, P2), L2),
+    filter_mask(Mask, L1, L2).
+```
